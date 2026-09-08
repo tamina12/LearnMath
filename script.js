@@ -1,0 +1,537 @@
+/* =========================================================
+   MATHLY — script.js
+   Better Math. Brighter Future.
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ---------------------------------------------------------
+     SETTINGS
+     --------------------------------------------------------- */
+
+  const SETTINGS = {
+    telegramUsername: "taminkaa12",
+
+    courses: {
+      "5": {
+        name: "5th Grade Math",
+        price: 5
+      },
+      "6": {
+        name: "6th Grade Math",
+        price: 5
+      },
+      "7": {
+        name: "7th Grade Math",
+        price: 7
+      },
+      "8": {
+        name: "8th Grade Math",
+        price: 7
+      }
+    },
+
+    bundle: {
+      name: "Mathly Complete Bundle",
+      price: 20
+    }
+  };
+
+
+  /* ---------------------------------------------------------
+     TELEGRAM
+     --------------------------------------------------------- */
+
+  function getTelegramUrl(message = "") {
+    const username = SETTINGS.telegramUsername;
+
+    if (!message) {
+      return `https://t.me/${username}`;
+    }
+
+    return `https://t.me/${username}?text=${encodeURIComponent(message)}`;
+  }
+
+
+  function openTelegram(message = "") {
+    window.open(getTelegramUrl(message), "_blank", "noopener,noreferrer");
+  }
+
+
+  /* ---------------------------------------------------------
+     COURSE BUTTONS
+     --------------------------------------------------------- */
+
+  const courseCards = document.querySelectorAll("[data-course]");
+
+  courseCards.forEach((card) => {
+    const courseId = card.dataset.course;
+    const course = SETTINGS.courses[courseId];
+
+    if (!course) return;
+
+    let button = card.querySelector(".course-action");
+
+    /*
+      If the HTML already contains a button,
+      we use it.
+    */
+    if (button) {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const message =
+          `Hello! I would like to learn more about ${course.name}. ` +
+          `The price is $${course.price}.`;
+
+        openTelegram(message);
+      });
+
+      return;
+    }
+
+    /*
+      If there is no button, create one.
+    */
+    button = document.createElement("a");
+    button.href = getTelegramUrl(
+      `Hello! I would like to learn more about ${course.name}. The price is $${course.price}.`
+    );
+    button.target = "_blank";
+    button.rel = "noopener noreferrer";
+    button.className = "course-action";
+    button.textContent = "Get started →";
+
+    card.appendChild(button);
+  });
+
+
+  /* ---------------------------------------------------------
+     BUNDLE BUTTON
+     --------------------------------------------------------- */
+
+  const bundleButtons = document.querySelectorAll(
+    "[data-bundle], .bundle-button, #bundleButton"
+  );
+
+  bundleButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const message =
+        `Hello! I am interested in the ${SETTINGS.bundle.name}. ` +
+        `The price is $${SETTINGS.bundle.price}.`;
+
+      openTelegram(message);
+    });
+  });
+
+
+  /* ---------------------------------------------------------
+     GENERAL TELEGRAM BUTTONS
+     --------------------------------------------------------- */
+
+  const telegramButtons = document.querySelectorAll(
+    "[data-telegram], .telegram-button"
+  );
+
+  telegramButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const customMessage = button.dataset.message || "";
+
+      openTelegram(customMessage);
+    });
+  });
+
+
+  /* ---------------------------------------------------------
+     MATH CHALLENGE
+     --------------------------------------------------------- */
+
+  const challengeInput = document.querySelector("#challengeAnswer");
+  const challengeButton = document.querySelector("#checkAnswer");
+  const challengeResult = document.querySelector("#challengeResult");
+
+  if (challengeInput && challengeButton) {
+
+    function checkAnswer() {
+      const answer = challengeInput.value.trim();
+
+      if (answer === "") {
+        if (challengeResult) {
+          challengeResult.textContent = "Enter your answer first ✏️";
+          challengeResult.className = "challenge-result";
+        }
+
+        return;
+      }
+
+      if (answer === "5") {
+
+        if (challengeResult) {
+          challengeResult.textContent = "Correct! 🎉 x = 5";
+          challengeResult.className =
+            "challenge-result correct";
+        }
+
+        challengeInput.classList.remove("incorrect");
+        challengeInput.classList.add("correct");
+
+      } else {
+
+        if (challengeResult) {
+          challengeResult.textContent =
+            "Not quite! Try again 💭";
+          challengeResult.className =
+            "challenge-result incorrect";
+        }
+
+        challengeInput.classList.remove("correct");
+        challengeInput.classList.add("incorrect");
+      }
+    }
+
+    challengeButton.addEventListener("click", checkAnswer);
+
+    challengeInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        checkAnswer();
+      }
+    });
+  }
+
+
+  /* ---------------------------------------------------------
+     SCROLL REVEAL
+     --------------------------------------------------------- */
+
+  const revealElements = document.querySelectorAll(
+    ".reveal, .course-card, .why-card, .vision-card, .challenge-card"
+  );
+
+  if ("IntersectionObserver" in window) {
+
+    const observer = new IntersectionObserver(
+      (entries, observerInstance) => {
+
+        entries.forEach((entry) => {
+
+          if (entry.isIntersecting) {
+
+            entry.target.classList.add("visible");
+
+            observerInstance.unobserve(entry.target);
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.12
+      }
+    );
+
+    revealElements.forEach((element) => {
+      element.classList.add("reveal-element");
+      observer.observe(element);
+    });
+  }
+
+
+  /* ---------------------------------------------------------
+     FLOATING MATH ELEMENTS
+     --------------------------------------------------------- */
+
+  const floatingElements = document.querySelectorAll(
+    ".floating-math, .math-decoration, .hero-decoration"
+  );
+
+  if (window.matchMedia("(pointer: fine)").matches) {
+
+    document.addEventListener("mousemove", (event) => {
+
+      const x =
+        (event.clientX / window.innerWidth - 0.5) * 2;
+
+      const y =
+        (event.clientY / window.innerHeight - 0.5) * 2;
+
+      floatingElements.forEach((element, index) => {
+
+        const strength = 4 + (index % 4) * 2;
+
+        element.style.transform =
+          `translate(${x * strength}px, ${y * strength}px)`;
+
+      });
+    });
+  }
+
+
+  /* ---------------------------------------------------------
+     CHALLENGE CARD TILT
+     --------------------------------------------------------- */
+
+  const challengeCards = document.querySelectorAll(
+    ".challenge-card"
+  );
+
+  if (window.matchMedia("(pointer: fine)").matches) {
+
+    challengeCards.forEach((card) => {
+
+      card.addEventListener("mousemove", (event) => {
+
+        const rect = card.getBoundingClientRect();
+
+        const x =
+          event.clientX - rect.left;
+
+        const y =
+          event.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX =
+          ((y - centerY) / centerY) * -2;
+
+        const rotateY =
+          ((x - centerX) / centerX) * 2;
+
+        card.style.transform =
+          `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+
+
+      card.addEventListener("mouseleave", () => {
+
+        card.style.transform =
+          "perspective(900px) rotateX(0deg) rotateY(0deg)";
+      });
+
+    });
+  }
+
+
+  /* ---------------------------------------------------------
+     ACTIVE NAVIGATION
+     --------------------------------------------------------- */
+
+  const sections = document.querySelectorAll(
+    "section[id]"
+  );
+
+  const navLinks = document.querySelectorAll(
+    ".nav-links a[href^='#']"
+  );
+
+  if (
+    sections.length > 0 &&
+    navLinks.length > 0 &&
+    "IntersectionObserver" in window
+  ) {
+
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+
+        entries.forEach((entry) => {
+
+          if (entry.isIntersecting) {
+
+            const id = entry.target.getAttribute("id");
+
+            navLinks.forEach((link) => {
+
+              link.classList.remove("active");
+
+              if (
+                link.getAttribute("href") === `#${id}`
+              ) {
+                link.classList.add("active");
+              }
+
+            });
+
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.35
+      }
+    );
+
+    sections.forEach((section) => {
+      sectionObserver.observe(section);
+    });
+  }
+
+
+  /* ---------------------------------------------------------
+     MOBILE MENU
+     --------------------------------------------------------- */
+
+  const nav = document.querySelector("nav");
+  const navLinksContainer =
+    document.querySelector(".nav-links");
+
+  if (nav && navLinksContainer) {
+
+    const mobileButton =
+      document.createElement("button");
+
+    mobileButton.className =
+      "mobile-menu-button";
+
+    mobileButton.setAttribute(
+      "aria-label",
+      "Open navigation menu"
+    );
+
+    mobileButton.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+
+    mobileButton.innerHTML = `
+      <span></span>
+      <span></span>
+      <span></span>
+    `;
+
+    nav.appendChild(mobileButton);
+
+    mobileButton.addEventListener("click", () => {
+
+      const isOpen =
+        nav.classList.toggle("menu-open");
+
+      mobileButton.setAttribute(
+        "aria-expanded",
+        isOpen ? "true" : "false"
+      );
+
+    });
+
+
+    navLinksContainer
+      .querySelectorAll("a")
+      .forEach((link) => {
+
+        link.addEventListener("click", () => {
+
+          nav.classList.remove("menu-open");
+
+          mobileButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+        });
+
+      });
+  }
+
+
+  /* ---------------------------------------------------------
+     SMOOTH SCROLL
+     --------------------------------------------------------- */
+
+  document
+    .querySelectorAll('a[href^="#"]')
+    .forEach((link) => {
+
+      link.addEventListener("click", (event) => {
+
+        const targetId =
+          link.getAttribute("href");
+
+        if (
+          !targetId ||
+          targetId === "#"
+        ) {
+          return;
+        }
+
+        const target =
+          document.querySelector(targetId);
+
+        if (!target) return;
+
+        event.preventDefault();
+
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      });
+
+    });
+
+
+  /* ---------------------------------------------------------
+     CURRENT YEAR
+     --------------------------------------------------------- */
+
+  const yearElements =
+    document.querySelectorAll("[data-year]");
+
+  yearElements.forEach((element) => {
+    element.textContent =
+      new Date().getFullYear();
+  });
+
+
+  /* ---------------------------------------------------------
+     BUTTON HOVER MICRO-INTERACTION
+     --------------------------------------------------------- */
+
+  const interactiveButtons =
+    document.querySelectorAll(
+      "button, .btn, .button, .course-action"
+    );
+
+  interactiveButtons.forEach((button) => {
+
+    button.addEventListener("mouseenter", () => {
+      button.classList.add("is-hovered");
+    });
+
+    button.addEventListener("mouseleave", () => {
+      button.classList.remove("is-hovered");
+    });
+
+  });
+
+
+  /* ---------------------------------------------------------
+     PREVENT EMPTY LINKS
+     --------------------------------------------------------- */
+
+  document
+    .querySelectorAll('a[href="#"]')
+    .forEach((link) => {
+
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+      });
+
+    });
+
+
+  /* ---------------------------------------------------------
+     PAGE LOADED
+     --------------------------------------------------------- */
+
+  document.body.classList.add("page-loaded");
+
+  console.log(
+    "Mathly is ready ✦ Better Math. Brighter Future."
+  );
+
+});
